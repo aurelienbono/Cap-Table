@@ -3,13 +3,12 @@ from fastapi.security import OAuth2PasswordBearer
 from sqlalchemy.orm import Session
 from typing import Generator
 
-# Imports locaux — ajuste les chemins selon ta structure
 from core.security import verify_token
 from models.user import User
 from database import get_db
 from crud.user import get_user_by_email
 
-# Configuration du schéma OAuth2 (extrait le token du header Authorization)
+
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/api/token")
 
 

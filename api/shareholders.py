@@ -10,6 +10,7 @@ from api.dependencies import get_current_admin
 from crud.shareholder import get_shareholder, create_shareholder as crud_create_shareholder
 from fastapi import Query
 from core.security import get_password_hash
+from models.audit_event import AuditEvent
 
 router = APIRouter()
 
@@ -46,5 +47,15 @@ def create_shareholder(
     db.refresh(user)
 
     shareholder = crud_create_shareholder(db, shareholder_in, user_id=user.id)
+
+
+
+    audit_log = AuditEvent(
+        action="CREATE_SHAREHOLDER",
+        user_id=current_user.id,
+        details=f"Created shareholder '{shareholder.name}' with email '{shareholder.email}'"
+    )
+    db.add(audit_log)
+    db.commit()
     
     return shareholder

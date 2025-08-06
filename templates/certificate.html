@@ -31,7 +31,7 @@
     <p>This certifies that <strong>{{ name }}</strong> owns <strong>{{ shares }}</strong> shares in <strong>{{ company_name }}</strong>.</p>
     <p>Issued on: <strong>{{ date }}</strong></p>
     <p>Certificate ID: <code>{{ certificate_id }}</code></p>
-    <p>Price per share: ${{ "%.2f"|format(price) if price else "N/A" }}</p>
+    <p>Price per share (FCFA/$): {{ "%.2f"|format(price) if price else "N/A" }}</p>
     <div class="footer">
         This certificate is issued under the laws of the company. Valid only with official signature and seal.
     </div>

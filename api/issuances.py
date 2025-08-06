@@ -10,6 +10,9 @@ from api.dependencies import get_current_user , get_current_admin
 from services.pdf_generator import generate_certificate_pdf
 from crud.share_issuance import create_share_issuance as crud_create_issuance
 from fastapi import Query
+from models.audit_event import AuditEvent
+
+
 
 router = APIRouter()
 
@@ -47,15 +50,13 @@ def create_issuance(
     issuance = crud_create_issuance(db, issuance_in)
 
 
-    # # Log audit event
-    # from models.audit_event import AuditEvent
-    # audit_log = AuditEvent(
-    #     action="ISSUE_SHARES",
-    #     user_id=current_user.id,
-    #     details=f"Issued {issuance_in.number_of_shares} shares to shareholder {shareholder.id}"
-    # )
-    # db.add(audit_log)
-    # db.commit()
+    audit_log = AuditEvent(
+        action="ISSUE_SHARES",
+        user_id=current_user.id,
+        details=f"Issued {issuance_in.number_of_shares} shares to shareholder {shareholder.id}"
+    )
+    db.add(audit_log)
+    db.commit()
 
 
     print(f"[EMAIL SIMULATION] Sent notification to shareholder {shareholder.email} about {issuance_in.number_of_shares} new shares.")
@@ -78,13 +79,11 @@ def get_certificate(
     if not issuance:
         raise HTTPException(status_code=404, detail="Issuance not found")
 
-    # Authorization: only admin or the shareholder can access
     if current_user.role == "shareholder":
         shareholder = db.query(Shareholder).filter(Shareholder.user_id == current_user.id).first()
         if not shareholder or shareholder.id != issuance.shareholder_id:
             raise HTTPException(status_code=403, detail="Access denied")
 
-    # Fetch shareholder name
     shareholder = db.query(Shareholder).filter(Shareholder.id == issuance.shareholder_id).first()
     pdf_data = {
         "name": shareholder.name,
@@ -97,6 +96,15 @@ def get_certificate(
     pdf_bytes = generate_certificate_pdf(issuance, shareholder.name)
 
     filename = f"share_certificate_{issuance_id}.pdf"
+
+
+    audit_log = AuditEvent(
+        action="DOWNLOAD_CERTIFICATE",
+        user_id=current_user.id,
+        details=f"User '{current_user.email}' downloaded certificate for issuance ID: {issuance.id} (Shareholder: {shareholder.name})"
+    )
+    db.add(audit_log)
+    db.commit()
 
     return Response(
         content=pdf_bytes,

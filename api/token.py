@@ -15,11 +15,30 @@ def login_for_access_token(
 ):
     user = db.query(User).filter(User.email == form_data.username).first()
     if not user or not verify_password(form_data.password, user.hashed_password):
+
+        audit_log = AuditEvent(
+            action="LOGIN_FAILED",
+            user_id=user.id if user else None,
+            details=f"Failed login attempt for email: {form_data.username}"
+        )
+        db.add(audit_log)
+        db.commit()
+
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Incorrect email or password",
             headers={"WWW-Authenticate": "Bearer"},
         )
+        
+
+    audit_log = AuditEvent(
+        action="LOGIN_SUCCESS",
+        user_id=user.id,
+        details=f"User '{user.email}' logged in successfully"
+    )
+    db.add(audit_log)
+    db.commit()
+
     access_token = create_access_token(data={"sub": user.email})
     return {"access_token": access_token, "token_type": "bearer"}
 

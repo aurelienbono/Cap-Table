@@ -1,5 +1,5 @@
 from fastapi import FastAPI
-from api import token ,issuances , shareholders
+from api import token ,issuances , shareholders , audit
 from database import Base, engine
 
 
@@ -11,6 +11,7 @@ Base.metadata.create_all(bind=engine)
 app.include_router(token.router)
 app.include_router(shareholders.router )
 app.include_router(issuances.router)
+app.include_router(audit.router)
 
 @app.get("/")
 def read_root():
