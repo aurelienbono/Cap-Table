@@ -8,7 +8,7 @@ from core.security import create_access_token, verify_password , get_password_ha
 from schemas.user import UserBase , UserCreate
 router = APIRouter()
 
-@router.post("/api/token/")
+@router.post("/api/token/",  tags=["token"])
 def login_for_access_token(
     form_data: OAuth2PasswordRequestForm = Depends(),
     db: Session = Depends(get_db)
@@ -28,7 +28,7 @@ def login_for_access_token(
 
 
 
-@router.post("/api/token/register/", status_code=status.HTTP_201_CREATED)
+@router.post("/api/token/register/", status_code=status.HTTP_201_CREATED,  tags=["token"])
 def register_user(user_in: UserCreate, db: Session = Depends(get_db)):
     existing_user = db.query(User).filter(User.email == user_in.email).first()
     if existing_user:
