@@ -2,6 +2,7 @@
 from sqlalchemy import Column, Integer, String, DateTime, ForeignKey
 from sqlalchemy.sql import func
 from database import Base
+import uuid 
 
 class AuditEvent(Base):
     __tablename__ = "audit_events"

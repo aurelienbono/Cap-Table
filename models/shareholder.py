@@ -5,8 +5,8 @@ from database import Base
 
 import uuid
 
-class Shareholder(Base):
-    __tablename__ = "shareholders"
+class ShareholderProfile(Base):
+    __tablename__ = "shareholderprofile"
 
     id = Column(String(36), primary_key=True, default=lambda: str(uuid.uuid4()), unique=True, nullable=False)
     name = Column(String, nullable=False)

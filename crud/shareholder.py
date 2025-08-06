@@ -1,5 +1,5 @@
 from sqlalchemy.orm import Session
-from models.shareholder import Shareholder as ShareholderModel
+from models.shareholder import ShareholderProfile as ShareholderModel
 from schemas.shareholder import ShareholderCreate
 
 def get_shareholder(db: Session, shareholder_id: int):

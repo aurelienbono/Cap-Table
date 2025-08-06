@@ -3,7 +3,7 @@ from fastapi import APIRouter, Depends, HTTPException, Response
 from sqlalchemy.orm import Session
 from database import get_db
 from models.user import User
-from models.shareholder import Shareholder
+from models.shareholder import ShareholderProfile
 from models.share_issuance import ShareIssuance
 from schemas.share_issuance import ShareIssuanceCreate, ShareIssuance as IssuanceSchema
 from api.dependencies import get_current_user , get_current_admin

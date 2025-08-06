@@ -6,6 +6,10 @@ from database import get_db
 from models.user import User
 from core.security import create_access_token, verify_password , get_password_hash
 from schemas.user import UserBase , UserCreate
+from models.audit_event import AuditEvent
+
+
+
 router = APIRouter()
 
 @router.post("/api/token/",  tags=["token"])
@@ -40,7 +44,7 @@ def login_for_access_token(
     db.commit()
 
     access_token = create_access_token(data={"sub": user.email})
-    return {"access_token": access_token, "token_type": "bearer"}
+    return {"access_token": access_token, "token_type": "bearer" ,'role':user.role , 'id':user.id}
 
 
 
@@ -72,4 +76,12 @@ def register_user(user_in: UserCreate, db: Session = Depends(get_db)):
     db.add(new_user)
     db.commit()
     db.refresh(new_user)
+
+    audit_log = AuditEvent(
+        action="REGISTER_SUCCESS",
+        user_id=new_user.id,
+        details=f"User '{new_user.email}' register in successfully"
+    )
+    db.add(audit_log)
+    db.commit()
     return {"msg": "User successfully registered", "user_id": new_user.id}

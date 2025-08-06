@@ -3,7 +3,7 @@ from weasyprint import HTML
 from jinja2 import Environment, FileSystemLoader
 import os
 from models.share_issuance import ShareIssuance
-from models.shareholder import Shareholder
+from models.shareholder import ShareholderProfile
 
 
 def generate_certificate_pdf(issuance: ShareIssuance, shareholder_name: str) -> bytes:

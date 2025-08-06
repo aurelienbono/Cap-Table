@@ -3,7 +3,7 @@ from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 from database import get_db
 from models.user import User
-from models.shareholder import Shareholder
+from models.shareholder import ShareholderProfile
 from schemas.shareholder import Shareholder as ShareholderSchema
 from schemas.shareholder import ShareholderCreate
 from api.dependencies import get_current_admin
@@ -52,7 +52,7 @@ def create_shareholder(
 
     audit_log = AuditEvent(
         action="CREATE_SHAREHOLDER",
-        user_id=current_user.id,
+        user_id=user.id,
         details=f"Created shareholder '{shareholder.name}' with email '{shareholder.email}'"
     )
     db.add(audit_log)
