@@ -6,7 +6,7 @@ from models.user import User
 from models.shareholder import ShareholderProfile
 from schemas.shareholder import Shareholder as ShareholderSchema
 from schemas.shareholder import ShareholderCreate
-from api.dependencies import get_current_admin
+from api.dependencies import *
 from crud.shareholder import get_shareholder, create_shareholder as crud_create_shareholder
 from fastapi import Query
 from core.security import get_password_hash
@@ -19,9 +19,9 @@ def list_shareholders(
     skip: int = Query(0, ge=0),
     limit: int = Query(100, ge=1, le=100),
     db: Session = Depends(get_db),
-    # current_user: User = Depends(get_current_admin)
+    current_user: User = Depends(get_current_admin)
 ):
-    shareholders = db.query(Shareholder).offset(skip).limit(limit).all()
+    shareholders = db.query(ShareholderProfile).offset(skip).limit(limit).all()
     result = []
     for sh in shareholders:
         total_shares = sum(issuance.number_of_shares for issuance in sh.issuances)
@@ -34,7 +34,7 @@ def list_shareholders(
 def create_shareholder(
     shareholder_in: ShareholderCreate,
     db: Session = Depends(get_db),
-    # current_user: User = Depends(get_current_admin)
+    current_user: User = Depends(get_current_admin)
 ):
     user = db.query(User).filter(User.email == shareholder_in.email).first()
     if user:
@@ -59,3 +59,26 @@ def create_shareholder(
     db.commit()
     
     return shareholder
+
+
+
+
+
+@router.get("/api/shareholders/profile/", response_model=ShareholderSchema, tags=["shareholders"])
+def get_my_shareholder_profile(
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
+):
+    profile = db.query(ShareholderProfile).filter(ShareholderProfile.user_id == current_user.id).first()
+
+    if current_user.role =='admin' : 
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Shareholder access required"
+        )
+    
+    if not profile:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Shareholder profile not found")
+
+    profile.total_shares = sum(i.number_of_shares for i in profile.issuances)
+    return profile
