@@ -1,0 +1,10 @@
+weasyprint
+pytest
+psycopg2-binary
+sqlalchemy
+uvicorn[standard]
+fastapi
+httpx
+# jose-jwt
+jinja2
+passlib
