@@ -14,7 +14,7 @@ def generate_certificate_pdf(issuance: ShareIssuance, shareholder_name: str) -> 
     html_out = template.render(
         name=shareholder_name,
         shares=issuance.number_of_shares,
-        price=issuance.price_per_share,
+        price=issuance.price,
         date=issuance.issued_date.strftime("%B %d, %Y"),
         certificate_id=issuance.id,
         company_name="Corporate OS Inc."

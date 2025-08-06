@@ -47,6 +47,59 @@ def create_issuance(
     issuance = crud_create_issuance(db, issuance_in)
 
 
+    # # Log audit event
+    # from models.audit_event import AuditEvent
+    # audit_log = AuditEvent(
+    #     action="ISSUE_SHARES",
+    #     user_id=current_user.id,
+    #     details=f"Issued {issuance_in.number_of_shares} shares to shareholder {shareholder.id}"
+    # )
+    # db.add(audit_log)
+    # db.commit()
+
+
     print(f"[EMAIL SIMULATION] Sent notification to shareholder {shareholder.email} about {issuance_in.number_of_shares} new shares.")
 
     return issuance 
+
+
+
+
+
+
+
+@router.get("/api/issuances/{issuance_id}/certificate/", tags=['issuances'])
+def get_certificate(
+    issuance_id: str,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
+):
+    issuance = db.query(ShareIssuance).filter(ShareIssuance.id == issuance_id).first()
+    if not issuance:
+        raise HTTPException(status_code=404, detail="Issuance not found")
+
+    # Authorization: only admin or the shareholder can access
+    if current_user.role == "shareholder":
+        shareholder = db.query(Shareholder).filter(Shareholder.user_id == current_user.id).first()
+        if not shareholder or shareholder.id != issuance.shareholder_id:
+            raise HTTPException(status_code=403, detail="Access denied")
+
+    # Fetch shareholder name
+    shareholder = db.query(Shareholder).filter(Shareholder.id == issuance.shareholder_id).first()
+    pdf_data = {
+        "name": shareholder.name,
+        "shares": issuance.number_of_shares,
+        "date": issuance.issued_date.strftime("%Y-%m-%d"),
+        "issuance_id": issuance.id,
+        "price": f"${issuance.price:.2f}" if issuance.price else "N/A"
+    }
+
+    pdf_bytes = generate_certificate_pdf(issuance, shareholder.name)
+
+    filename = f"share_certificate_{issuance_id}.pdf"
+
+    return Response(
+        content=pdf_bytes,
+        media_type="application/pdf",
+        headers={"Content-Disposition": f"attachment; filename={filename}"}
+    )
