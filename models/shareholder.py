@@ -13,4 +13,4 @@ class Shareholder(Base):
     email = Column(String, nullable=False) 
     user_id = Column(String(36), ForeignKey("users.id"), nullable=False)
     user = relationship("User", backref="shareholder_profile")
-    issuances = relationship("models.share_issuance.ShareIssuance", back_populates="shareholder", cascade="all, delete-orphan")
+    issuances = relationship("models.share_issuance.ShareIssuance", back_populates="shareholder", cascade="all, delete-orphan") 

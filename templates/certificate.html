@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Share Certificate</title>
+    <style>
+        @page { margin: 2cm; }
+        body {
+            font-family: 'Georgia', serif;
+            text-align: center;
+            position: relative;
+        }
+        .watermark {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%) rotate(-45deg);
+            font-size: 80px;
+            color: rgba(200, 200, 200, 0.1);
+            z-index: -1;
+            pointer-events: none;
+            white-space: nowrap;
+        }
+        h1 { color: #0d47a1; }
+        .footer { margin-top: 30px; font-style: italic; color: #555; }
+    </style>
+</head>
+<body>
+    <div class="watermark">OFFICIAL SHARE CERTIFICATE</div>
+    <h1>Share Certificate</h1>
+    <p>This certifies that <strong>{{ name }}</strong> owns <strong>{{ shares }}</strong> shares in <strong>{{ company_name }}</strong>.</p>
+    <p>Issued on: <strong>{{ date }}</strong></p>
+    <p>Certificate ID: <code>{{ certificate_id }}</code></p>
+    <p>Price per share: ${{ "%.2f"|format(price) if price else "N/A" }}</p>
+    <div class="footer">
+        This certificate is issued under the laws of the company. Valid only with official signature and seal.
+    </div>
+</body>
+</html>

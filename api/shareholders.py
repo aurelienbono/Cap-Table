@@ -6,7 +6,7 @@ from models.user import User
 from models.shareholder import Shareholder
 from schemas.shareholder import Shareholder as ShareholderSchema
 from schemas.shareholder import ShareholderCreate
-# from api.dependencies import get_current_admin
+from api.dependencies import get_current_admin
 from crud.shareholder import get_shareholder, create_shareholder as crud_create_shareholder
 from fastapi import Query
 from core.security import get_password_hash

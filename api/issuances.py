@@ -1,0 +1,52 @@
+# issuances.py
+from fastapi import APIRouter, Depends, HTTPException, Response
+from sqlalchemy.orm import Session
+from database import get_db
+from models.user import User
+from models.shareholder import Shareholder
+from models.share_issuance import ShareIssuance
+from schemas.share_issuance import ShareIssuanceCreate, ShareIssuance as IssuanceSchema
+from api.dependencies import get_current_user , get_current_admin
+from services.pdf_generator import generate_certificate_pdf
+from crud.share_issuance import create_share_issuance as crud_create_issuance
+from fastapi import Query
+
+router = APIRouter()
+
+@router.get("/api/issuances/", response_model=list[IssuanceSchema] , tags=['issuances'])
+def list_issuances(
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
+):
+    if current_user.role == "admin":
+        issuances = db.query(ShareIssuance).all()
+    elif current_user.role == "shareholder":
+        shareholder = db.query(Shareholder).filter(Shareholder.user_id == current_user.id).first()
+        if not shareholder:
+            raise HTTPException(status_code=404, detail="Shareholder profile not found")
+        issuances = db.query(ShareIssuance).filter(ShareIssuance.shareholder_id == shareholder.id).all()
+    else:
+        raise HTTPException(status_code=403, detail="Access denied")
+
+    return issuances
+
+
+@router.post("/api/issuances/", response_model=IssuanceSchema, tags=['issuances'])
+def create_issuance(
+    issuance_in: ShareIssuanceCreate,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_admin)
+):
+    shareholder = db.query(Shareholder).filter(Shareholder.id == issuance_in.shareholder_id).first()
+    if not shareholder:
+        raise HTTPException(status_code=404, detail="Shareholder not found")
+
+    if issuance_in.number_of_shares <= 0:
+        raise HTTPException(status_code=400, detail="Number of shares must be positive")
+
+    issuance = crud_create_issuance(db, issuance_in)
+
+
+    print(f"[EMAIL SIMULATION] Sent notification to shareholder {shareholder.email} about {issuance_in.number_of_shares} new shares.")
+
+    return issuance 

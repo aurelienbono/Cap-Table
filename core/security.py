@@ -1,6 +1,9 @@
 from datetime import datetime, timedelta
 import jwt  
 from passlib.context import CryptContext
+from typing import Any, Dict
+
+
 
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
@@ -23,3 +26,15 @@ def create_access_token(data: dict, expires_delta: timedelta = None) -> str:
     to_encode.update({"exp": expire})
     encoded_jwt = jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
     return encoded_jwt
+
+
+
+
+def verify_token(token: str, credentials_exception: Exception) -> Dict[str, Any]:
+    try:
+        payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
+        return payload
+    except jwt.ExpiredSignatureError:
+        raise credentials_exception
+    except jwt.JWTError:
+        raise credentials_exception
