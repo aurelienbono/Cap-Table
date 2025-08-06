@@ -2,6 +2,8 @@
 from sqlalchemy import Column, Integer, Float, DateTime, ForeignKey
 from sqlalchemy.sql import func
 from database import Base
+from sqlalchemy.orm import relationship
+
 
 class ShareIssuance(Base):
     __tablename__ = "share_issuances"
@@ -12,4 +14,5 @@ class ShareIssuance(Base):
     price = Column(Float, nullable=True) 
     issued_date = Column(DateTime(timezone=True), default=func.now())
     created_at = Column(DateTime(timezone=True), server_default=func.now())
-    shareholder = relationship("Shareholder", back_populates="issuances")
+    shareholder = relationship("models.shareholder.Shareholder", back_populates="issuances")
+    
