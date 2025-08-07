@@ -24,7 +24,7 @@ def list_issuances(
     if current_user.role == "admin":
         issuances = db.query(ShareIssuance).all()
     elif current_user.role == "shareholder":
-        shareholder = db.query(Shareholder).filter(Shareholder.user_id == current_user.id).first()
+        shareholder = db.query(ShareholderProfile).filter(ShareholderProfile.user_id == current_user.id).first()
         if not shareholder:
             raise HTTPException(status_code=404, detail="Shareholder profile not found")
         issuances = db.query(ShareIssuance).filter(ShareIssuance.shareholder_id == shareholder.id).all()
@@ -40,7 +40,7 @@ def create_issuance(
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_admin)
 ):
-    shareholder = db.query(Shareholder).filter(Shareholder.id == issuance_in.shareholder_id).first()
+    shareholder = db.query(ShareholderProfile).filter(ShareholderProfile.id == issuance_in.shareholder_id).first()
     if not shareholder:
         raise HTTPException(status_code=404, detail="Shareholder not found")
 
@@ -80,11 +80,11 @@ def get_certificate(
         raise HTTPException(status_code=404, detail="Issuance not found")
 
     if current_user.role == "shareholder":
-        shareholder = db.query(Shareholder).filter(Shareholder.user_id == current_user.id).first()
+        shareholder = db.query(ShareholderProfile).filter(ShareholderProfile.user_id == current_user.id).first()
         if not shareholder or shareholder.id != issuance.shareholder_id:
             raise HTTPException(status_code=403, detail="Access denied")
 
-    shareholder = db.query(Shareholder).filter(Shareholder.id == issuance.shareholder_id).first()
+    shareholder = db.query(ShareholderProfile).filter(ShareholderProfile.id == issuance.shareholder_id).first()
     pdf_data = {
         "name": shareholder.name,
         "shares": issuance.number_of_shares,
