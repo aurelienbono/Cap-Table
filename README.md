@@ -45,8 +45,8 @@ Elle permet de gérer :
 1. **Cloner le projet**
 
    ```bash
-   git clone https://github.com/tonuser/cap-table.git
-   cd cap-table
+   git clone https://github.com/aurelienbono/Cap-Table.git
+   cd Cap-Table
    ```
 
 2. **Créer un environnement virtuel**
